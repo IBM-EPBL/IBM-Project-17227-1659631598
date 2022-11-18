@@ -33,11 +33,13 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 # GLobal variables
 EMAIL = ''
 USERID = ''
-
-conn = ibm_db.connect("DATABASE=bludb;HOSTNAME=54a2f15b-5c0f-46df-8954-7e38e612c2bd.c1ogj3sd0tgtu0lqde00.databases.appdomain.cloud;PORT=32733;Security=SSL;SSLServerCertificate=DigiCertGlobalRootCA.crt;UID=nlg66799;PWD=CXtQLAGZ06fD0fhC;", "", "")
-
+print()
+try:
+    conn = ibm_db.connect("DATABASE=bludb;HOSTNAME=54a2f15b-5c0f-46df-8954-7e38e612c2bd.c1ogj3sd0tgtu0lqde00.databases.appdomain.cloud;PORT=32733;Security=SSL;SSLServerCertificate=DigiCertGlobalRootCA.crt;UID=nlg66799;PWD=CXtQLAGZ06fD0fhC;", "", "")
+except Exception as e:
+    print(e)
 # FUNCTIONS INTERACTING WITH DB #
-
+print('hello')
 
 def fetch_walletamount():
     sql = 'SELECT WALLET FROM PETA_USER WHERE EMAIL=?'
@@ -305,9 +307,10 @@ def auto_renew():
 # caller code for the cron
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=auto_renew, trigger="interval", seconds=3600 * 24)
-
+print('hello')
 # END POINTS #
 scheduler.start()
+print('hello')
 atexit.register(lambda: scheduler.shutdown())
 
 
@@ -482,10 +485,13 @@ def add_expense():
 
         amount_spent = request.form['amountspent']
         category_id = request.form.get('category')
-        description = request.form['description']
+        description = request.form.get('description')
         date = request.form['date']
+
         groupid = request.form.get('group')
-        # print(amount_spent, category_id, description, date, groupid, USERID)
+        groupid = None if groupid == '' else groupid
+
+        print(amount_spent, category_id, description, date, groupid, USERID)
 
         sql = "INSERT INTO PETA_EXPENSE(USERID, EXPENSE_AMOUNT, CATEGORYID, GROUPID, DESCRIPTION, DATE) VALUES(?,?,?,?,?,?)"
         stmt = ibm_db.prepare(conn, sql)
@@ -763,3 +769,4 @@ scheduler.add_job(func=check_goals, trigger="interval", seconds=3600 * 24)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
+
